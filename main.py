@@ -1,6 +1,15 @@
 from tkinter import *
-from pycrypto import *
 from function import *
+from Crypto.Cipher import DES3
+from Crypto import Random
+from enum import Enum
+from tkinter import filedialog
+
+class alg(Enum):
+    des=1
+    aes=2
+    sra=3
+type_crypt = alg.des
 
 window = Tk()
 window.title("Cryptography")
@@ -27,6 +36,7 @@ btn_des = Button(frame2,
     text="DES")
 btn_des.pack(side=LEFT)
 def btn_des_clicked():
+    type_crypt=alg.des
     btn_des.configure(bg="gray")
     btn_aes.configure(bg="white")
     btn_rsa.configure(bg="white")
@@ -38,6 +48,7 @@ btn_aes = Button(frame2,
     text="AES")
 btn_aes.pack(side=LEFT)
 def btn_aes_clicked():
+    type_crypt=alg.aes
     btn_des.configure(bg="white")
     btn_aes.configure(bg="gray")
     btn_rsa.configure(bg="white")
@@ -49,6 +60,7 @@ btn_rsa = Button(frame2,
     text="RSA")
 btn_rsa.pack(side=LEFT)
 def btn_rsa_clicked():
+    type_crypt=alg.rsa
     btn_des.configure(bg="white")
     btn_aes.configure(bg="white")
     btn_rsa.configure(bg="gray")
@@ -65,6 +77,21 @@ btn_file = Button(frame3,
 btn_file.pack(side=LEFT)
 def btn_file_clicked():
     btn_file.configure(bg="gray")
+    link_file = filedialog.askopenfilenames(
+        initialdir='/',
+    	filetypes=[
+    		("All files", "*"),
+            ("txt", "*.txt"),
+            ("PNG", "*.png"),
+            ("JPEG", "*.jpg"),
+            ("PDF", "*.pdf"),
+            ("MP3", "*.mp3"),
+            ("MP4", "*.mp4")])
+    print(link_file[0])
+    f=open(link_file[0],'r')
+    file_cont = f.read()
+    f.close()
+    print(file_cont)
 btn_file.configure(command=btn_file_clicked)
 
 btn_key = Button(frame3, 
@@ -74,19 +101,26 @@ btn_key = Button(frame3,
 btn_key.pack(side=LEFT)
 def btn_key_clicked():
     btn_key.configure(bg="gray")
+    link_key = filedialog.askopenfilenames(
+        initialdir='/',
+    	filetypes=[
+    		("txt", ".txt")])
+    f=open(link_key[0],'r')
+    key = f.read()
+    f.close()   
 btn_key.configure(command=btn_key_clicked)
 
 #frame 4
 frame4 = Frame(window)
 frame4.pack()
 
-mess_key = Label(frame4,
+mess_stt = Label(frame4,
     width = 63, 
     height = 15,
     bg="white",
     anchor = NW,
-    text="Key is: ")
-mess_key.pack()
+    text="Status:\n")
+mess_stt.pack()
 
 #frame 5
 frame5 = Frame(window)
@@ -109,5 +143,13 @@ btn_decode.pack(side=LEFT)
 def btn_decode_clicked():
     btn_decode.configure(bg="gray")
 btn_decode.configure(command=btn_decode_clicked)
+
+# key = b'Sixteen byte key'
+# iv = Random.new().read(DES3.block_size)
+# cipher = DES3.new(key, DES3.MODE_OFB, iv)
+# plaintext = b'sona si latine loqueris '
+# msg = iv + cipher.encrypt(plaintext)
+# messagebox.showinfo( "Hello",msg)
+
 
 window.mainloop()
