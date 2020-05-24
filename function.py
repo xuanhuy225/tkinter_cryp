@@ -7,7 +7,7 @@ from Crypto import Random
 import os, struct
 from Crypto.Cipher import PKCS1_OAEP
 
-des_file = ""
+destination = ""
 
 def getKey(key):
     hasher = MD5.new(key.encode('utf-8'))
@@ -52,8 +52,6 @@ def des_decrypt_file(key, in_filename, out_filename=None, chunksize = 64*1024):
 
     if not out_filename:
         out_filename = os.path.splitext(in_filename)[0]
-    global des_file
-    des_file = out_filename
         
     with open(in_filename, 'rb') as infile:
         origsize = struct.unpack('<Q', infile.read(struct.calcsize('Q')))[0]
@@ -66,6 +64,9 @@ def des_decrypt_file(key, in_filename, out_filename=None, chunksize = 64*1024):
                     break
                 outfile.write(decryptor.decrypt(chunk))
             outfile.truncate(origsize)
+    global destination
+    f = open(out_filename, 'rb')
+    destination = f.read()
     messagebox.showinfo("","decode complete")
 
 def aes_encrypt_file(key, in_filename, out_filename=None, chunksize = 64*1024):
@@ -107,8 +108,6 @@ def aes_decrypt_file(key, in_filename, out_filename=None, chunksize = 64*1024):
 
     if not out_filename:
         out_filename = os.path.splitext(in_filename)[0]
-    global des_file
-    des_file = out_filename
 
     with open(in_filename, 'rb') as infile:
         origsize = struct.unpack('<Q', infile.read(struct.calcsize('Q')))[0]
@@ -122,6 +121,9 @@ def aes_decrypt_file(key, in_filename, out_filename=None, chunksize = 64*1024):
                     break
                 outfile.write(decryptor.decrypt(chunk))
             outfile.truncate(origsize)
+    global destination
+    f = open(out_filename, 'rb')
+    destination = f.read()
     messagebox.showinfo("","decode complete")
 
 def init_key_RSA(link_key):
@@ -175,8 +177,6 @@ def rsa_decrypt_file(link_key, in_filename, out_filename=None, chunksize = 256):
 
     if not out_filename:
         out_filename = os.path.splitext(in_filename)[0]
-    global des_file
-    des_file = out_filename
 
     f = open(os.path.splitext(link_key)[0] + "_priKey.pem")
     RSAkey = RSA.importKey(f.read())
@@ -193,14 +193,30 @@ def rsa_decrypt_file(link_key, in_filename, out_filename=None, chunksize = 256):
                     break
                 decrypt_chunk = cipher.decrypt(chunk) #error
                 outFile.write(decrypt_chunk)
+    global destination
+    f = open(out_filename, 'rb')
+    destination = f.read()
     messagebox.showinfo("","decode complete")
 
 def checkMD5(origin_file):
-    if len(des_file) == 0:
+    global destination
+    if len(destination) == 0:
         messagebox.showinfo( "error","no destination file")
         return
     if len(origin_file) == 0:
         messagebox.showinfo( "error","no origin file")
         return
+
+    f = open(origin_file, 'rb')
+    origin = f.read()
+    origin_hash = MD5.new(origin)
+    origin_hash = origin_hash.digest()
+    f.close()
     
-    
+    destination_hash = MD5.new(destination)
+    destination_hash = destination_hash.digest()
+
+    if origin_hash == destination_hash:
+        messagebox.showinfo("check","Data Integrity")
+    else: 
+        messagebox.showinfo("check","Data not Integrity")
